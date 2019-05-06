@@ -1,0 +1,40 @@
+{
+  "name": "tx-state-manager",
+  "version": "1.0.0",
+  "description": "txMeta and staus mangament for metamask",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MetaMask/transaction-state-manager.git"
+  },
+  "keywords": [
+    "ethereum",
+    "metamask"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MetaMask/transaction-state-manager/issues"
+  },
+  "homepage": "https://github.com/MetaMask/transaction-state-manager#readme",
+  "dependencies": {
+    "clone": "^2.1.2",
+    "ethereumjs-util": "^6.1.0",
+    "fast-json-patch": "^2.1.0",
+    "loglevel": "^1.6.1",
+    "obs-store": "^4.0.2",
+    "safe-event-emitter": "^1.0.1",
+    "xtend": "^4.0.1"
+  },
+  "devDependencies": {
+    "assert": "^1.4.1",
+    "mocha": "^6.1.4"
+  }
+}
