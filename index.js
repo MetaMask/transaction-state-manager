@@ -1,17 +1,29 @@
 const extend = require('xtend')
+const clone = require('clone')
 const EventEmitter = require('safe-event-emitter')
 const ObservableStore = require('obs-store')
+const o = require('observable')
 const ethUtil = require('ethereumjs-util')
 const log = require('loglevel')
 const txStateHistoryHelper = require('./lib/tx-state-history-helper')
 const createId = require('./lib/random-id')
 const { getFinalStates } = require('./lib/util')
+const STATUS_DEFAULTS = [
+  'unapproved',
+  'approved',
+  'signed',
+  'submitted',
+  'confirmed',
+  'dropped',
+]
+const TEST_ENV = process.env.TEST_ENV
 /**
   TransactionStateManager is responsible for the state of a transaction and
   storing the transaction
   it also has some convenience methods for finding subsets of transactions
+  and a `subscribe` method to subscribe
   *
-  *STATUS METHODS
+  * DEFAULT STATUS METHODS
   <br>statuses:
   <br>   - `'unapproved'` the user has not responded
   <br>   - `'rejected'` the user has responded no!
@@ -28,14 +40,26 @@ const { getFinalStates } = require('./lib/util')
   @param {function} opts.getNetwork return network number
   @class
 */
-class TransactionStateManager extends EventEmitter {
-  constructor ({ initState, txHistoryLimit, getNetwork }) {
-    super()
-
+class TransactionStateManager {
+  constructor ({ initState, txHistoryLimit, getNetwork, customStatusList = STATUS_DEFAULTS }) {
+    if (customStatusList) {
+      customStatusList.forEach((status) => {
+        const cStatus = status.charAt(0).toUpperCase() + status.slice(1)
+        this[`setTxStatus${cStatus}`] = (txId) => this._setTxStatus(txId, status)
+      })
+    }
     this.store = new ObservableStore(
       extend({
         transactions: [],
     }, initState))
+    const txList = this.getFullTxList()
+    this._txStates = {}
+    if (txList.length) {
+      txLst.forEach((tx) => {
+        this._txStates[tx.id] = o(tx.status)
+      })
+    }
+
     this.txHistoryLimit = txHistoryLimit
     this.getNetwork = getNetwork
   }
@@ -126,12 +150,6 @@ class TransactionStateManager extends EventEmitter {
     @returns {object} the txMeta
   */
   addTx (txMeta) {
-    this.once(`${txMeta.id}:signed`, function (txId) {
-      this.removeAllListeners(`${txMeta.id}:rejected`)
-    })
-    this.once(`${txMeta.id}:rejected`, function (txId) {
-      this.removeAllListeners(`${txMeta.id}:signed`)
-    })
     // initialize history
     txMeta.history = []
     // capture initial snapshot of txMeta for history
@@ -156,6 +174,7 @@ class TransactionStateManager extends EventEmitter {
       }
     }
     transactions.push(txMeta)
+    this._txStates[txMeta.id] = o(txMeta.status)
     this._saveTxList(transactions)
     return txMeta
   }
@@ -166,7 +185,7 @@ class TransactionStateManager extends EventEmitter {
   */
   getTx (txId) {
     const txMeta = this.getTxsByMetaData('id', txId)[0]
-    return txMeta
+    return clone(txMeta)
   }
 
   /**
@@ -196,8 +215,14 @@ class TransactionStateManager extends EventEmitter {
     const txId = txMeta.id
     const txList = this.getFullTxList()
     const index = txList.findIndex(txData => txData.id === txId)
+    const previousStatus = this.getTxStatus(txId)
+    const newStatus = txMeta.status
     txList[index] = txMeta
+
     this._saveTxList(txList)
+    if (previousStatus !== newStatus) {
+      this._txStates[txId](newStatus)
+    }
   }
 
 
@@ -283,6 +308,43 @@ class TransactionStateManager extends EventEmitter {
       }
     })
   }
+  /**
+    subscribe to status changes of a particular tx
+    @param txId {number} - the txMeta Id
+    @param listener {function} - the listener
+    @param status {string} - the desired status for the listener to be triggered. if undefined applies to all status changes and will be immediately triggered
+    @return {boolean} weather the listener was applied. Returns false if tx does not exist
+  */
+
+  subscribe (txId, listener, status) {
+    if (!this._txStates[txId]) return false
+
+    if (!this._txStates[txId][status]) this._txStates[txId][status] = []
+
+    if (status) {
+      this._txStates[txId]((newStatus) => {
+        try {
+          if (newStatus === status) listener(txId)
+        } catch (e) {
+          // ignore expected test errors so console is free of clutter
+          if (TEST_ENV && e.message === 'test error - ignore') return
+          log.error(e)
+        }
+      })
+    } else {
+      this._txStates[txId]((newStatus) => {
+        try {
+          listener(txId, newStatus)
+        } catch (e) {
+          // ignore expected test errors so console is free of clutter
+          if (TEST_ENV && e.message === 'test error - ignore') return
+          log.error(e)
+        }
+      })
+    }
+
+    return true
+  }
 
   // get::set status
 
@@ -303,58 +365,6 @@ class TransactionStateManager extends EventEmitter {
     this._setTxStatus(txId, 'rejected')
     this._removeTx(txId)
   }
-
-  /**
-    should update the status of the tx to 'unapproved'.
-    @param txId {number} - the txMeta Id
-  */
-  setTxStatusUnapproved (txId) {
-    this._setTxStatus(txId, 'unapproved')
-  }
-  /**
-    should update the status of the tx to 'approved'.
-    @param txId {number} - the txMeta Id
-  */
-  setTxStatusApproved (txId) {
-    this._setTxStatus(txId, 'approved')
-  }
-
-  /**
-    should update the status of the tx to 'signed'.
-    @param txId {number} - the txMeta Id
-  */
-  setTxStatusSigned (txId) {
-    this._setTxStatus(txId, 'signed')
-  }
-
-  /**
-    should update the status of the tx to 'submitted'.
-    and add a time stamp for when it was called
-    @param txId {number} - the txMeta Id
-  */
-  setTxStatusSubmitted (txId) {
-    const txMeta = this.getTx(txId)
-    txMeta.submittedTime = (new Date()).getTime()
-    this.updateTx(txMeta, 'txStateManager - add submitted time stamp')
-    this._setTxStatus(txId, 'submitted')
-  }
-
-  /**
-    should update the status of the tx to 'confirmed'.
-    @param txId {number} - the txMeta Id
-  */
-  setTxStatusConfirmed (txId) {
-    this._setTxStatus(txId, 'confirmed')
-  }
-
-  /**
-    should update the status of the tx to 'dropped'.
-    @param txId {number} - the txMeta Id
-  */
-  setTxStatusDropped (txId) {
-    this._setTxStatus(txId, 'dropped')
-  }
-
 
   /**
     should update the status of the tx to 'failed'.
@@ -421,19 +431,7 @@ class TransactionStateManager extends EventEmitter {
     }
 
     txMeta.status = status
-    setTimeout(() => {
-      try {
-        this.updateTx(txMeta, `txStateManager: setting status to ${status}`)
-        this.emit(`${txMeta.id}:${status}`, txId)
-        this.emit(`tx:status-update`, txId, status)
-        if (['submitted', 'rejected', 'failed'].includes(status)) {
-          this.emit(`${txMeta.id}:finished`, txMeta)
-        }
-        this.emit('update:badge')
-      } catch (error) {
-        log.error(error)
-      }
-    })
+    this.updateTx(txMeta, `txStateManager: setting status to ${status}`)
   }
 
   /**
@@ -446,6 +444,7 @@ class TransactionStateManager extends EventEmitter {
   }
 
   _removeTx (txId) {
+    delete this._txStates[txId]
     const transactionList = this.getFullTxList()
     this._saveTxList(transactionList.filter((txMeta) => txMeta.id !== txId))
   }
