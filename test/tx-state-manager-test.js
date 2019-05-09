@@ -6,7 +6,7 @@ describe('TransactionStateManager', function () {
   let txStateManager
   const currentNetworkId = 42
   const otherNetworkId = 2
-
+  const from = '0x32d44db61df0b10ccf0164df3d9cbee72e3df02c'
   beforeEach(function () {
     txStateManager = new TxStateManager({
       initState: {
@@ -19,7 +19,7 @@ describe('TransactionStateManager', function () {
 
   describe('#setTxStatusSigned', function () {
     it('sets the tx status to signed', function () {
-      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       txStateManager.setTxStatusSigned(1)
       const result = txStateManager.getTxList()
@@ -31,7 +31,7 @@ describe('TransactionStateManager', function () {
 
   describe('#setTxStatusRejected', function () {
      it('sets the tx status to rejected and removes it from history', function () {
-      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       txStateManager.setTxStatusRejected(1)
       const result = txStateManager.getTxList()
@@ -39,7 +39,7 @@ describe('TransactionStateManager', function () {
       assert.equal(result.length, 0)
     })
    it('should remove status observable', function () {
-      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       assert(txStateManager._txStates[1], 'observable should be present')
       txStateManager.setTxStatusRejected(1)
@@ -66,7 +66,7 @@ describe('TransactionStateManager', function () {
   describe('#subscribe', function () {
     it('should call listener on specific status update', function (done) {
       this.timeout(3000)
-      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       const didApply = txStateManager.subscribe(1, (txId) => {
         assert.equal(txId, 1)
@@ -81,7 +81,7 @@ describe('TransactionStateManager', function () {
 
     it('should isolate errors of a listener and still execute other listeners', function (done) {
       this.timeout(3000)
-      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       const didApplyError = txStateManager.subscribe(1, (txId) => {
         throw new Error('test error - ignore')
@@ -101,7 +101,7 @@ describe('TransactionStateManager', function () {
 
     it('should isolate errors of a listener and still execute other listeners for any status', function (done) {
       this.timeout(3000)
-      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       const didApplyError = txStateManager.subscribe(1, (txId) => {
         throw new Error('test error - ignore')
@@ -131,7 +131,7 @@ describe('TransactionStateManager', function () {
 
   describe('#addTx', function () {
     it('adds a tx returned in getTxList', function () {
-      const tx = { id: 1, status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       const result = txStateManager.getTxList()
       assert.ok(Array.isArray(result))
@@ -140,8 +140,8 @@ describe('TransactionStateManager', function () {
     })
 
     it('does not override txs from other networks', function () {
-      const tx = { id: 1, status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} }
-      const tx2 = { id: 2, status: 'confirmed', metamaskNetworkId: otherNetworkId, txParams: {} }
+      const tx = { id: 1, status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } }
+      const tx2 = { id: 2, status: 'confirmed', metamaskNetworkId: otherNetworkId, txParams: { from, } }
       txStateManager.addTx(tx)
       txStateManager.addTx(tx2)
       const result = txStateManager.getFullTxList()
@@ -153,7 +153,7 @@ describe('TransactionStateManager', function () {
     it('cuts off early txs beyond a limit', function () {
       const limit = txStateManager.txHistoryLimit
       for (let i = 0; i < limit + 1; i++) {
-        const tx = { id: i, time: new Date(), status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} }
+        const tx = { id: i, time: new Date(), status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } }
         txStateManager.addTx(tx)
       }
       const result = txStateManager.getTxList()
@@ -164,7 +164,7 @@ describe('TransactionStateManager', function () {
     it('cuts off early txs beyond a limit whether or not it is confirmed or rejected', function () {
       const limit = txStateManager.txHistoryLimit
       for (let i = 0; i < limit + 1; i++) {
-        const tx = { id: i, time: new Date(), status: 'rejected', metamaskNetworkId: currentNetworkId, txParams: {} }
+        const tx = { id: i, time: new Date(), status: 'rejected', metamaskNetworkId: currentNetworkId, txParams: { from, } }
         txStateManager.addTx(tx)
       }
       const result = txStateManager.getTxList()
@@ -173,11 +173,11 @@ describe('TransactionStateManager', function () {
     })
 
     it('cuts off early txs beyond a limit but does not cut unapproved txs', function () {
-      const unconfirmedTx = { id: 0, time: new Date(), status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} }
+      const unconfirmedTx = { id: 0, time: new Date(), status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
       txStateManager.addTx(unconfirmedTx)
       const limit = txStateManager.txHistoryLimit
       for (let i = 1; i < limit + 1; i++) {
-        const tx = { id: i, time: new Date(), status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} }
+        const tx = { id: i, time: new Date(), status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } }
         txStateManager.addTx(tx)
       }
       const result = txStateManager.getTxList()
@@ -190,8 +190,8 @@ describe('TransactionStateManager', function () {
 
   describe('#updateTx', function () {
     it('replaces the tx with the same id', function () {
-      txStateManager.addTx({ id: '1', status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} })
-      txStateManager.addTx({ id: '2', status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} })
+      txStateManager.addTx({ id: '1', status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } })
+      txStateManager.addTx({ id: '2', status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } })
       const txMeta = txStateManager.getTx('1')
       txMeta.hash = 'foo'
       txStateManager.updateTx(txMeta)
@@ -209,6 +209,7 @@ describe('TransactionStateManager', function () {
         metamaskNetworkId: currentNetworkId,
         txParams: {
           gasPrice: originalGasPrice,
+          from,
         },
       }
 
@@ -240,8 +241,8 @@ describe('TransactionStateManager', function () {
 
   describe('#getUnapprovedTxList', function () {
     it('returns unapproved txs in a hash', function () {
-      txStateManager.addTx({ id: '1', status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} })
-      txStateManager.addTx({ id: '2', status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} })
+      txStateManager.addTx({ id: '1', status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } })
+      txStateManager.addTx({ id: '2', status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } })
       const result = txStateManager.getUnapprovedTxList()
       assert.equal(typeof result, 'object')
       assert.equal(result['1'].status, 'unapproved')
@@ -251,8 +252,8 @@ describe('TransactionStateManager', function () {
 
   describe('#getTx', function () {
     it('returns a tx with the requested id', function () {
-      txStateManager.addTx({ id: '1', status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: {} })
-      txStateManager.addTx({ id: '2', status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: {} })
+      txStateManager.addTx({ id: '1', status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } })
+      txStateManager.addTx({ id: '2', status: 'confirmed', metamaskNetworkId: currentNetworkId, txParams: { from, } })
       assert.equal(txStateManager.getTx('1').status, 'unapproved')
       assert.equal(txStateManager.getTx('2').status, 'confirmed')
     })

@@ -7,7 +7,7 @@ const ethUtil = require('ethereumjs-util')
 const log = require('loglevel')
 const txStateHistoryHelper = require('./lib/tx-state-history-helper')
 const createId = require('./lib/random-id')
-const { getFinalStates } = require('./lib/util')
+const { getFinalStates, validateTxParams } = require('./lib/util')
 const STATUS_DEFAULTS = [
   'unapproved',
   'approved',
@@ -200,7 +200,7 @@ class TransactionStateManager {
         delete txMeta.txParams.data
       }
 
-      this.validateTxParams(txMeta.txParams)
+      validateTxParams(txMeta.txParams)
     }
 
     // create txMeta snapshot for history
@@ -236,26 +236,6 @@ class TransactionStateManager {
     const txMeta = this.getTx(txId)
     txMeta.txParams = extend(txMeta.txParams, txParams)
     this.updateTx(txMeta, `txStateManager#updateTxParams`)
-  }
-
-  /**
-    validates txParams members by type
-    @param txParams {object} - txParams to validate
-  */
-  validateTxParams (txParams) {
-    Object.keys(txParams).forEach((key) => {
-      const value = txParams[key]
-      // validate types
-      switch (key) {
-        case 'chainId':
-          if (typeof value !== 'number' && typeof value !== 'string') throw new Error(`${key} in txParams is not a Number or hex string. got: (${value})`)
-          break
-        default:
-          if (typeof value !== 'string') throw new Error(`${key} in txParams is not a string. got: (${value})`)
-          if (!ethUtil.isHexPrefixed(value)) throw new Error(`${key} in txParams is not hex prefixed. got: (${value})`)
-          break
-      }
-    })
   }
 
 /**
