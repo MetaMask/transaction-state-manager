@@ -59,7 +59,7 @@ class TransactionStateManager {
         this._txStates[tx.id] = o(tx.status)
       })
     }
-
+    this._txStates['*'] = o({})
     this.txHistoryLimit = txHistoryLimit
     this.getNetwork = getNetwork
   }
@@ -149,7 +149,8 @@ class TransactionStateManager {
     @param txMeta {Object}
     @returns {object} the txMeta
   */
-  addTx (txMeta) {
+  addTx (tx) {
+    const txMeta = clone(tx)
     // initialize history
     txMeta.history = []
     // capture initial snapshot of txMeta for history
@@ -175,6 +176,7 @@ class TransactionStateManager {
     }
     transactions.push(txMeta)
     this._txStates[txMeta.id] = o(txMeta.status)
+    this._txStates['*']({txId: txMeta.id, status: txMeta.status})
     this._saveTxList(transactions)
     return txMeta
   }
@@ -222,6 +224,7 @@ class TransactionStateManager {
     this._saveTxList(txList)
     if (previousStatus !== newStatus) {
       this._txStates[txId](newStatus)
+      this._txStates['*']({txId: txMeta.id, status: txMeta.status})
     }
   }
 
@@ -301,9 +304,22 @@ class TransactionStateManager {
 
     if (!this._txStates[txId][status]) this._txStates[txId][status] = []
 
-    if (status) {
+    //all status updates
+    if (txId === '*') {
+      this._txStates[txId]((newStatusObj) => {
+        try {
+          if(!newStatusObj.txId || !newStatusObj.status) return
+          listener(newStatusObj.txId, newStatusObj.status)
+        } catch (e) {
+          // ignore expected test errors so console is free of clutter
+          if (TEST_ENV && e.message === 'test error - ignore') return
+          log.error(e)
+        }
+      })
+    } else if (status) {
       this._txStates[txId]((newStatus) => {
         try {
+
           if (newStatus === status) listener(txId)
         } catch (e) {
           // ignore expected test errors so console is free of clutter
@@ -405,7 +421,6 @@ class TransactionStateManager {
   */
   _setTxStatus (txId, status) {
     const txMeta = this.getTx(txId)
-
     if (!txMeta) {
       return
     }

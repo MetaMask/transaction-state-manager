@@ -79,6 +79,39 @@ describe('TransactionStateManager', function () {
       txStateManager.setTxStatusApproved(1)
     })
 
+    it('should call listener on any status update for any tx', function (done) {
+      this.timeout(3000)
+      const tx1 = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
+      const tx2 = { id: 2, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
+      const tx3 = { id: 3, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
+      const tx4 = { id: 4, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
+      const tx5 = { id: 5, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }
+      txStateManager.addTx(tx1)
+      txStateManager.addTx(tx2)
+      txStateManager.addTx(tx3)
+      txStateManager.addTx(tx4)
+      txStateManager.addTx(tx5)
+
+      const statusCollection = []
+      const didApply = txStateManager.subscribe('*', (txId, status) => {
+        statusCollection.push(status)
+        if (
+          statusCollection[0] === 'unapproved' &&
+          statusCollection[1] === 'approved' &&
+          statusCollection[2] === 'signed' &&
+          statusCollection[3] === 'submitted' &&
+          statusCollection[4] === 'confirmed'
+          ) done()
+      })
+
+      assert(didApply, 'should be true if the listener was successfully applied')
+      txStateManager.setTxStatusApproved(1)
+      txStateManager.setTxStatusSigned(2)
+      txStateManager.setTxStatusSubmitted(3)
+      txStateManager.setTxStatusConfirmed(4)
+    })
+
+
     it('should isolate errors of a listener and still execute other listeners', function (done) {
       this.timeout(3000)
       const tx = { id: 1, status: 'unapproved', metamaskNetworkId: currentNetworkId, txParams: { from, } }

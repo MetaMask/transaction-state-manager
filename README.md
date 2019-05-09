@@ -2,7 +2,10 @@
 
 Metamask txMeta status/state management
 
+`npm i tx-state-manager`
+
 ```js
+const TxStateManager = require('tx-state-manager')
 const txStateManager = new TxStateManager({
   initState: {
     transactions: [],
