@@ -23,35 +23,35 @@
         -   [Parameters][19]
     -   [updateTxParams][20]
         -   [Parameters][21]
-    -   [validateTxParams][22]
+    -   [getFilteredTxList][22]
         -   [Parameters][23]
-    -   [getFilteredTxList][24]
+    -   [getTxsByMetaData][24]
         -   [Parameters][25]
-    -   [getTxsByMetaData][26]
+    -   [subscribe][26]
         -   [Parameters][27]
-    -   [subscribe][28]
+    -   [getTxStatus][28]
         -   [Parameters][29]
-    -   [getTxStatus][30]
+    -   [setTxStatusRejected][30]
         -   [Parameters][31]
-    -   [setTxStatusRejected][32]
+    -   [setTxStatusFailed][32]
         -   [Parameters][33]
-    -   [setTxStatusFailed][34]
+    -   [wipeTransactions][34]
         -   [Parameters][35]
-    -   [wipeTransactions][36]
+    -   [\_setTxStatus][36]
         -   [Parameters][37]
-    -   [\_setTxStatus][38]
+    -   [\_saveTxList][38]
         -   [Parameters][39]
-    -   [\_saveTxList][40]
-        -   [Parameters][41]
--   [tx-state-history-helper][42]
--   [util][43]
+-   [tx-state-history-helper][40]
+-   [util][41]
+    -   [Parameters][42]
+-   [generateHistoryEntry][43]
     -   [Parameters][44]
--   [generateHistoryEntry][45]
+-   [replayHistory][45]
     -   [Parameters][46]
--   [replayHistory][47]
+-   [snapshotFromTxMeta][47]
     -   [Parameters][48]
--   [snapshotFromTxMeta][49]
-    -   [Parameters][50]
+    -   [Parameters][49]
+-   [validateTxParams][50]
     -   [Parameters][51]
 -   [validateTxParams][52]
     -   [Parameters][53]
@@ -63,7 +63,7 @@
 
 ## TransactionStateManager
 
-[index.js:43-451][59]
+[index.js:43-431][59]
 
 TransactionStateManager is responsible for the state of a transaction and
 storing the transaction
@@ -201,19 +201,9 @@ use extend to ensure that all fields are filled
 -   `txId`  {number} - the id of the txMeta
 -   `txParams`  {object} - the updated txParams
 
-### validateTxParams
-
-[index.js:245-259][75]
-
-validates txParams members by type
-
-#### Parameters
-
--   `txParams`  {object} - txParams to validate
-
 ### getFilteredTxList
 
-[index.js:287-293][76]
+[index.js:267-273][75]
 
 #### Parameters
 
@@ -231,7 +221,7 @@ options matching
 
 ### getTxsByMetaData
 
-[index.js:302-310][77]
+[index.js:282-290][76]
 
 #### Parameters
 
@@ -244,7 +234,7 @@ Returns **[array][65]** a list of txMetas who matches the search params
 
 ### subscribe
 
-[index.js:319-347][78]
+[index.js:299-327][77]
 
 subscribe to status changes of a particular tx
 
@@ -254,21 +244,21 @@ subscribe to status changes of a particular tx
 -   `listener`  {function} - the listener
 -   `status`  {string} - the desired status for the listener to be triggered. if undefined applies to all status changes and will be immediately triggered
 
-Returns **[boolean][79]** weather the listener was applied. Returns false if tx does not exist
+Returns **[boolean][78]** weather the listener was applied. Returns false if tx does not exist
 
 ### getTxStatus
 
-[index.js:355-358][80]
+[index.js:335-338][79]
 
 #### Parameters
 
 -   `txId`  {number} - the txMeta Id
 
-Returns **[string][81]** the status of the tx.
+Returns **[string][80]** the status of the tx.
 
 ### setTxStatusRejected
 
-[index.js:364-367][82]
+[index.js:344-347][81]
 
 should update the status of the tx to 'rejected'.
 
@@ -278,7 +268,7 @@ should update the status of the tx to 'rejected'.
 
 ### setTxStatusFailed
 
-[index.js:375-386][83]
+[index.js:355-366][82]
 
 should update the status of the tx to 'failed'.
 and put the error on the txMeta
@@ -290,7 +280,7 @@ and put the error on the txMeta
 
 ### wipeTransactions
 
-[index.js:393-403][84]
+[index.js:373-383][83]
 
 Removes transaction from the given address for the current network
 from the txList
@@ -301,7 +291,7 @@ from the txList
 
 ### \_setTxStatus
 
-[index.js:426-435][85]
+[index.js:406-415][84]
 
 #### Parameters
 
@@ -310,7 +300,7 @@ from the txList
 
 ### \_saveTxList
 
-[index.js:442-444][86]
+[index.js:422-424][85]
 
 Saves the new/updated txList.
 
@@ -320,15 +310,15 @@ Saves the new/updated txList.
 
 ## tx-state-history-helper
 
-[lib/tx-state-history-helper.js:4-9][87]
+[lib/tx-state-history-helper.js:4-9][86]
 
 ## util
 
-[lib/util.js:9-15][88]
+[lib/util.js:10-16][87]
 
 ## 
 
-[lib/tx-state-history-helper.js:4-9][87]
+[lib/tx-state-history-helper.js:4-9][86]
 
 converts non-initial history entries into diffs
 
@@ -340,7 +330,7 @@ Returns **[array][65]**
 
 ## generateHistoryEntry
 
-[lib/tx-state-history-helper.js:39-48][89]
+[lib/tx-state-history-helper.js:39-48][88]
 
 Generates an array of history objects sense the previous state.
 The object has the keys
@@ -359,7 +349,7 @@ Returns **[array][65]**
 
 ## replayHistory
 
-[lib/tx-state-history-helper.js:54-57][90]
+[lib/tx-state-history-helper.js:54-57][89]
 
 Recovers previous txMeta state obj
 
@@ -371,7 +361,7 @@ Returns **[object][60]**
 
 ## snapshotFromTxMeta
 
-[lib/tx-state-history-helper.js:63-69][91]
+[lib/tx-state-history-helper.js:63-69][90]
 
 ### Parameters
 
@@ -381,7 +371,7 @@ Returns **[object][60]** a clone object of the txMeta with out history
 
 ## 
 
-[lib/util.js:19-27][92]
+[lib/util.js:20-28][91]
 
 normalizes txParams
 
@@ -393,7 +383,7 @@ Returns **[object][60]** normalized txParams
 
 ## validateTxParams
 
-[lib/util.js:47-60][93]
+[lib/util.js:54-81][92]
 
 validates txParams
 
@@ -401,9 +391,19 @@ validates txParams
 
 -   `txParams`  {object}
 
+## validateTxParams
+
+[lib/util.js:54-81][92]
+
+validates txParams members by type
+
+### Parameters
+
+-   `txParams`  {object} - txParams to validate
+
 ## validateFrom
 
-[lib/util.js:66-69][94]
+[lib/util.js:87-90][93]
 
 validates the from field in  txParams
 
@@ -413,7 +413,7 @@ validates the from field in  txParams
 
 ## validateRecipient
 
-[lib/util.js:75-86][95]
+[lib/util.js:96-107][94]
 
 validates the to field in  txParams
 
@@ -423,7 +423,7 @@ validates the to field in  txParams
 
 ## getFinalStates
 
-[lib/util.js:91-98][96]
+[lib/util.js:112-119][95]
 
 Returns **any** an {array} of states that can be considered final
 
@@ -469,63 +469,63 @@ Returns **any** an {array} of states that can be considered final
 
 [21]: #parameters-8
 
-[22]: #validatetxparams
+[22]: #getfilteredtxlist
 
 [23]: #parameters-9
 
-[24]: #getfilteredtxlist
+[24]: #gettxsbymetadata
 
 [25]: #parameters-10
 
-[26]: #gettxsbymetadata
+[26]: #subscribe
 
 [27]: #parameters-11
 
-[28]: #subscribe
+[28]: #gettxstatus
 
 [29]: #parameters-12
 
-[30]: #gettxstatus
+[30]: #settxstatusrejected
 
 [31]: #parameters-13
 
-[32]: #settxstatusrejected
+[32]: #settxstatusfailed
 
 [33]: #parameters-14
 
-[34]: #settxstatusfailed
+[34]: #wipetransactions
 
 [35]: #parameters-15
 
-[36]: #wipetransactions
+[36]: #_settxstatus
 
 [37]: #parameters-16
 
-[38]: #_settxstatus
+[38]: #_savetxlist
 
 [39]: #parameters-17
 
-[40]: #_savetxlist
+[40]: #tx-state-history-helper
 
-[41]: #parameters-18
+[41]: #util
 
-[42]: #tx-state-history-helper
+[42]: #parameters-18
 
-[43]: #util
+[43]: #generatehistoryentry
 
 [44]: #parameters-19
 
-[45]: #generatehistoryentry
+[45]: #replayhistory
 
 [46]: #parameters-20
 
-[47]: #replayhistory
+[47]: #snapshotfromtxmeta
 
 [48]: #parameters-21
 
-[49]: #snapshotfromtxmeta
+[49]: #parameters-22
 
-[50]: #parameters-22
+[50]: #validatetxparams
 
 [51]: #parameters-23
 
@@ -543,7 +543,7 @@ Returns **any** an {array} of states that can be considered final
 
 [58]: #getfinalstates
 
-[59]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L43-L451 "Source code on GitHub"
+[59]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L43-L431 "Source code on GitHub"
 
 [60]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
@@ -551,70 +551,68 @@ Returns **any** an {array} of states that can be considered final
 
 [62]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[63]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L71-L81 "Source code on GitHub"
+[63]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L71-L81 "Source code on GitHub"
 
-[64]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L86-L90 "Source code on GitHub"
+[64]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L86-L90 "Source code on GitHub"
 
 [65]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[66]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L95-L97 "Source code on GitHub"
+[66]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L95-L97 "Source code on GitHub"
 
-[67]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L102-L108 "Source code on GitHub"
+[67]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L102-L108 "Source code on GitHub"
 
-[68]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L115-L119 "Source code on GitHub"
+[68]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L115-L119 "Source code on GitHub"
 
-[69]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L126-L130 "Source code on GitHub"
+[69]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L126-L130 "Source code on GitHub"
 
-[70]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L137-L141 "Source code on GitHub"
+[70]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L137-L141 "Source code on GitHub"
 
-[71]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L152-L180 "Source code on GitHub"
+[71]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L152-L180 "Source code on GitHub"
 
-[72]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L186-L189 "Source code on GitHub"
+[72]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L186-L189 "Source code on GitHub"
 
-[73]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L196-L226 "Source code on GitHub"
+[73]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L196-L226 "Source code on GitHub"
 
-[74]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L235-L239 "Source code on GitHub"
+[74]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L235-L239 "Source code on GitHub"
 
-[75]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L245-L259 "Source code on GitHub"
+[75]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L267-L273 "Source code on GitHub"
 
-[76]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L287-L293 "Source code on GitHub"
+[76]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L282-L290 "Source code on GitHub"
 
-[77]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L302-L310 "Source code on GitHub"
+[77]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L299-L327 "Source code on GitHub"
 
-[78]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L319-L347 "Source code on GitHub"
+[78]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 
-[79]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[79]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L335-L338 "Source code on GitHub"
 
-[80]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L355-L358 "Source code on GitHub"
+[80]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[81]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[81]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L344-L347 "Source code on GitHub"
 
-[82]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L364-L367 "Source code on GitHub"
+[82]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L355-L366 "Source code on GitHub"
 
-[83]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L375-L386 "Source code on GitHub"
+[83]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L373-L383 "Source code on GitHub"
 
-[84]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L393-L403 "Source code on GitHub"
+[84]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L406-L415 "Source code on GitHub"
 
-[85]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L426-L435 "Source code on GitHub"
+[85]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/index.js#L422-L424 "Source code on GitHub"
 
-[86]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/index.js#L442-L444 "Source code on GitHub"
+[86]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/tx-state-history-helper.js#L4-L9 "Source code on GitHub"
 
-[87]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/tx-state-history-helper.js#L4-L9 "Source code on GitHub"
+[87]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/util.js#L10-L16 "Source code on GitHub"
 
-[88]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/util.js#L9-L15 "Source code on GitHub"
+[88]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/tx-state-history-helper.js#L39-L48 "Source code on GitHub"
 
-[89]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/tx-state-history-helper.js#L39-L48 "Source code on GitHub"
+[89]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/tx-state-history-helper.js#L54-L57 "Source code on GitHub"
 
-[90]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/tx-state-history-helper.js#L54-L57 "Source code on GitHub"
+[90]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/tx-state-history-helper.js#L63-L69 "Source code on GitHub"
 
-[91]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/tx-state-history-helper.js#L63-L69 "Source code on GitHub"
+[91]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/util.js#L20-L28 "Source code on GitHub"
 
-[92]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/util.js#L19-L27 "Source code on GitHub"
+[92]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/util.js#L54-L81 "Source code on GitHub"
 
-[93]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/util.js#L47-L60 "Source code on GitHub"
+[93]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/util.js#L87-L90 "Source code on GitHub"
 
-[94]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/util.js#L66-L69 "Source code on GitHub"
+[94]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/util.js#L96-L107 "Source code on GitHub"
 
-[95]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/util.js#L75-L86 "Source code on GitHub"
-
-[96]: https://github.com/MetaMask/transaction-state-manager/blob/02cd14a0685865351def605cd1d7ac2abfb5211f/lib/util.js#L91-L98 "Source code on GitHub"
+[95]: https://github.com/MetaMask/transaction-state-manager/blob/e1647671627d8523f32f43e53181442e2f81ce42/lib/util.js#L112-L119 "Source code on GitHub"
